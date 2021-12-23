@@ -13,7 +13,21 @@ function part1() {
             }, 0);
         })
     );
-    //return {min, max};
 }
 
-console.log({part1: part1()});
+function part2() {
+    const data = raw.split(',').map((ii) => parseInt(ii));
+    const min = Math.min(...data);
+    const max = Math.max(...data);
+    return Math.min(
+        ...Array.from(new Array(max), (_, i) => i + min).map((goal) => {
+            return data.reduce((rr, ii) => {
+                const used = ii > goal ? ii - goal : goal - ii;
+                const triangle = (used * (used + 1)) / 2;
+                return rr + triangle;
+            }, 0);
+        })
+    );
+}
+
+console.log({part1: part1(), part2: part2()});
