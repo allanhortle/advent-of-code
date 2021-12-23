@@ -5,6 +5,10 @@ function data(input: string): number[] {
     return input.split(',').map((ii) => parseInt(ii, 10));
 }
 
+//
+// Part 1
+//
+
 function cycle(fish: number[]) {
     const newFish: number[] = [];
     const nextFish = fish.map((ii) => {
@@ -20,4 +24,22 @@ function cycle(fish: number[]) {
 
 const part1 = [...new Array(80)].reduce((aa) => cycle(aa), data(raw)).length;
 
-console.log({part1});
+//
+// Part 2
+//
+
+const part2data = raw.split(',').reduce((rr, ii) => {
+    rr[parseInt(ii)]++;
+    return rr;
+}, new Array(9).fill(0));
+
+const part2 = [...new Array(256)]
+    .reduce((state) => {
+        const newFish = state.shift();
+        state[6] += newFish;
+        state[8] = newFish;
+        return state;
+    }, part2data)
+    .reduce((aa: number, bb: number) => aa + bb);
+
+console.log({part1, part2});
