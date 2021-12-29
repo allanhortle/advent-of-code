@@ -13,17 +13,22 @@ function prepareData(input: string) {
     return {dots, folds, maxX, maxY, grid};
 }
 
-function flipY<T>(grid: T[][]) {
-    const next = [...grid];
-    for (let y = 0; y <= Math.ceil(next.length / 2) - 1; y++) {
-        const swap = next.length - (1 + y);
-        const a = next[y];
-        const b = next[swap];
-        next[y] = b;
-        next[swap] = a;
+const fold = {
+    y: <T>(grid: T[][]) => {
+        const next = [...grid];
+        for (let y = 0; y <= Math.ceil(next.length / 2) - 1; y++) {
+            const swap = next.length - (1 + y);
+            const a = next[y];
+            const b = next[swap];
+            next[y] = b;
+            next[swap] = a;
+        }
+        return next;
+    },
+    x: <T>(grid: T[][]) => {
+        return grid.map((row) => [...row].reverse());
     }
-    return next;
-}
+};
 
 function split(direction: 'x' | 'y', foldPoint: number, grid: boolean[][]) {
     if (direction === 'y') {
@@ -36,16 +41,12 @@ function split(direction: 'x' | 'y', foldPoint: number, grid: boolean[][]) {
     return [a, b];
 }
 
-function flipX<T>(grid: T[][]) {
-    return grid.map((row) => [...row].reverse());
-}
-
 function merge(a: boolean[][], b: boolean[][]) {
     return a.map((row, y) => row.map((i, x) => i || b[y][x]));
 }
 
 function print(grid: boolean[][]) {
-    console.log(grid.map((r) => r.map((i) => (i ? '#' : '.')).join('')).join('\n'));
+    console.log(grid.map((r) => r.map((i) => (i ? '▓' : ' ')).join('')).join('\n'));
 }
 
 function part1(data: string) {
@@ -54,16 +55,27 @@ function part1(data: string) {
     // mark dots on the grid
     dots.forEach(([x, y]) => (grid[y][x] = true));
 
-    const foldMethods = {x: flipX, y: flipY};
     const [direction, foldPoint] = folds[0] || ['x', 0];
 
     // slice at fold point and reverse side b onto a
     let [a, b] = split(direction, foldPoint, grid);
-    console.log(direction, a.length, b.length);
-    b = foldMethods[direction](b);
+    b = fold[direction](b);
     const c = merge(a, b);
     // count the grid
     return c.flat().reduce((rr, ii) => rr + (ii ? 1 : 0), 0);
 }
 
-console.log({part1: part1(input)});
+function part2(data: string) {
+    const {dots, grid, folds} = prepareData(data);
+    dots.forEach(([x, y]) => (grid[y][x] = true));
+
+    const output = folds.reduce((rr, [direction, foldPoint]) => {
+        let [a, b] = split(direction, foldPoint, rr);
+        b = fold[direction](b);
+        return merge(a, b);
+    }, grid);
+
+    print(output);
+}
+
+console.log({part1: part1(input), part2: part2(input)});
